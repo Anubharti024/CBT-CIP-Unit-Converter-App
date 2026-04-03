@@ -1,50 +1,157 @@
-# Welcome to your Expo app 👋
+# 📱 Unit Converter App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, fast, and user-friendly **React Native Unit Converter** application that supports multiple categories like Length, Mass, Temperature, and Time with real-time conversion and smooth animations.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Features
 
-   ```bash
-   npm install
-   ```
+* 🔄 **Real-time Conversion** – Instant results as you type
+* 📏 **Multiple Categories**
 
-2. Start the app
+  * Length
+  * Mass
+  * Temperature
+  * Time
+* 🔍 **Searchable Dropdowns** for easy unit selection
+* 🎯 **Accurate Calculations** using optimized conversion logic
+* ✨ **Smooth Animations** with React Native Animated API
+* 📱 **Clean & Minimal UI** for better user experience
+* ⚡ **Lightweight & Fast Performance**
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+* **React Native**
+* **TypeScript**
+* **Expo (Optional for development/build)**
+* **@react-native-picker/picker**
+* **react-native-element-dropdown**
+* **Animated API**
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 📂 Project Structure
 
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+UnitConverter/
+│── App.tsx
+│── assets/
+│── components/ (optional future scaling)
+│── package.json
+│── README.md
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## ⚙️ Installation & Setup
 
-To learn more about developing your project with Expo, look at the following resources:
+### 1️⃣ Clone the Repository
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+git clone https://github.com/your-username/unit-converter-app.git
+cd unit-converter-app
+```
 
-## Join the community
+### 2️⃣ Install Dependencies
 
-Join our community of developers creating universal apps.
+```bash
+npm install
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 3️⃣ Run the App
+
+```bash
+npx expo start
+```
+
+---
+
+## 📦 Build APK (Android)
+
+If you're using Expo (EAS):
+
+```bash
+eas build -p android --profile preview
+```
+
+After build:
+
+* Download APK from Expo dashboard
+* Share or install directly
+
+---
+
+## 🧠 Conversion Logic
+
+The app uses **base unit normalization** for accurate conversions:
+
+* Length → meters
+* Mass → kilograms
+* Time → seconds
+* Temperature → Celsius (intermediate conversion)
+
+Example:
+
+```ts
+(val * baseUnit[from]) / baseUnit[to]
+```
+
+Temperature uses custom formulas for precision.
+
+---
+
+## 🎨 UI Highlights
+
+* Soft background color for readability
+* Rounded input fields and dropdowns
+* Animated result display (fade + slide)
+* Clean typography and spacing
+
+---
+
+## 🔮 Future Enhancements
+
+* 🌍 More Unit Categories (Speed, Area, Volume)
+* 🔊 Voice Input Support
+* 📊 History Tracking
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repo
+2. Create your feature branch
+3. Commit changes
+4. Push to branch
+5. Open a Pull Request
+
+---
+
+## 👨‍💻 Author
+
+**Anu Bharti**
+
+* 💼 React Native Developer || Softwere Engineer
+* 🚀 Passionate about building scalable mobile apps
+
+---
+
+## ⭐ Support
+
+If you like this project:
+
+* ⭐ Star the repository
+* 🍴 Fork it
+* 📢 Share it
+
+---
+
+## 💡 Note
+
+This project is designed for learning and production-level UI/logic implementation. Feel free to extend it with advanced features.
+
+---
