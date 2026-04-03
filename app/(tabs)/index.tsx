@@ -1,98 +1,249 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Picker } from "@react-native-picker/picker";
+import React, { useRef, useState } from "react";
+import {
+  Animated,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+/* == TYPES == */
+type Category = "Length" | "Mass" | "Temperature" | "Time";
 
-export default function HomeScreen() {
+type UnitOption = {
+  label: string;
+  value: string;
+};
+
+/* === CATEGORY DATA ===*/
+const categories: Record<Category, string[]> = {
+  Length: ["meter", "kilometer", "centimeter", "millimeter", "micrometer", "nanometer", "inch", "foot", "yard", "mile", "nautical mile"],
+  Mass: ["kilogram", "gram", "milligram", "microgram", "tonne", "pound", "ounce", "stone"],
+  Temperature: ["Celsius", "Fahrenheit", "Kelvin", "Rankine"],
+  Time: ["millisecond", "second", "minute", "hour", "day", "week", "month", "year", "decade", "century"],
+};
+
+export default function App() {
+  const [category, setCategory] = useState<Category>("Length");
+  const [fromUnit, setFromUnit] = useState<string>("meter");
+  const [toUnit, setToUnit] = useState<string>("kilometer");
+  const [inputValue, setInputValue] = useState<string>("");
+  const [result, setResult] = useState<string>("");
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const animateResult = () => {
+    fadeAnim.setValue(0);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  /* === CONVERSION FUNCTION === */
+  const convert = (value: string, from: string, to: string, category: Category): number | "" => {
+    let val = parseFloat(value);
+    if (isNaN(val)) return "";
+
+    const lengthMap: any = {
+      meter: 1, kilometer: 1000, centimeter: 0.01, millimeter: 0.001,
+      micrometer: 1e-6, nanometer: 1e-9, inch: 0.0254, foot: 0.3048,
+      yard: 0.9144, mile: 1609.34, "nautical mile": 1852,
+    };
+
+    const massMap: any = {
+      kilogram: 1, gram: 0.001, milligram: 1e-6, microgram: 1e-9,
+      tonne: 1000, pound: 0.453592, ounce: 0.0283495, stone: 6.35029,
+    };
+
+    const timeMap: any = {
+      millisecond: 0.001, second: 1, minute: 60, hour: 3600,
+      day: 86400, week: 604800, month: 2628000,
+      year: 31536000, decade: 315360000, century: 3153600000,
+    };
+
+    if (category === "Length") return (val * lengthMap[from]) / lengthMap[to];
+    if (category === "Mass") return (val * massMap[from]) / massMap[to];
+    if (category === "Time") return (val * timeMap[from]) / timeMap[to];
+
+    if (category === "Temperature") {
+      let tempC: number;
+
+      if (from === "Celsius") tempC = val;
+      else if (from === "Fahrenheit") tempC = (val - 32) * (5 / 9);
+      else if (from === "Kelvin") tempC = val - 273.15;
+      else tempC = (val - 491.67) * (5 / 9);
+
+      if (to === "Celsius") return tempC;
+      if (to === "Fahrenheit") return tempC * (9 / 5) + 32;
+      if (to === "Kelvin") return tempC + 273.15;
+      return (tempC + 273.15) * (9 / 5);
+    }
+
+    return "";
+  };
+
+  const handleConvert = (value: string, f = fromUnit, t = toUnit, c = category) => {
+    setInputValue(value);
+    const res = convert(value, f, t, c);
+    setResult(res !== "" ? res.toFixed(4) : "");
+    animateResult();
+  };
+
+  const unitOptions: UnitOption[] = categories[category].map((item) => ({
+    label: item,
+    value: item,
+  }));
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <StatusBar backgroundColor="#e2e9f4" barStyle="dark-content" />
+
+      <Text style={styles.title}>Unit Converter</Text>
+
+      {/* CATEGORY */}
+      <Picker
+        selectedValue={category}
+        style={styles.picker}
+        onValueChange={(itemValue: Category) => {
+          const newFrom = categories[itemValue][0];
+          const newTo = categories[itemValue][1];
+
+          setCategory(itemValue);
+          setFromUnit(newFrom);
+          setToUnit(newTo);
+          setInputValue("");
+          setResult("");
+        }}
+      >
+        {Object.keys(categories).map((cat) => (
+          <Picker.Item key={cat} label={cat} value={cat} color="#000" />
+        ))}
+      </Picker>
+
+      {/* INPUT */}
+      <TextInput
+        style={styles.input}
+        placeholder="Enter value..."
+        placeholderTextColor="#000"
+        keyboardType="numeric"
+        value={inputValue}
+        onChangeText={(val) => handleConvert(val)}
+      />
+
+      {/* FROM */}
+      <Text style={styles.label}>From</Text>
+      <Dropdown
+        style={styles.dropdown}
+        data={unitOptions}
+        search
+        labelField="label"
+        valueField="value"
+        value={fromUnit}
+        onChange={(item: UnitOption) => {
+          setFromUnit(item.value);
+          handleConvert(inputValue, item.value, toUnit, category);
+        }}
+      />
+
+      {/* TO */}
+      <Text style={styles.label}>To</Text>
+      <Dropdown
+        style={styles.dropdown}
+        data={unitOptions}
+        search
+        labelField="label"
+        valueField="value"
+        value={toUnit}
+        onChange={(item: UnitOption) => {
+          setToUnit(item.value);
+          handleConvert(inputValue, fromUnit, item.value, category);
+        }}
+      />
+
+      {/* RESULT */}
+      <Animated.Text
+        style={[
+          styles.result,
+          {
+            opacity: fadeAnim,
+            transform: [
+              {
+                translateY: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [10, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        Result: {result || "—"}
+      </Animated.Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 20,
+    marginTop: 40,
+    backgroundColor: "#e2e9f4",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+    marginTop: 20,
+    color: "#000",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+
+  picker: {
+    color: "#000",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#a7a4a4",
+    padding: 12,
+    borderRadius: 10,
+    marginVertical: 15,
+    backgroundColor: "#fff",
+    color: "#000",
+  },
+
+  label: {
+    marginTop: 10,
+    fontWeight: "600",
+    fontSize: 20,
+    color: "#000",
+  },
+
+  dropdown: {
+    height: 50,
+    borderColor: "#a7a4a4",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+    marginTop: 5,
+  },
+
+  result: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 50,
+    color: "#333",
   },
 });
